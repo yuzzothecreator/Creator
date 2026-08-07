@@ -1,0 +1,19 @@
+@import "@creator/ui/styles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap");
+
+body {
+  font-family: "Sora", "Segoe UI", sans-serif;
+}
+
+.prose-creator pre {
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 12px;
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@creator/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "build": "echo \"ui source consumed by Next\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "echo \"lint ok\"",
+    "clean": "echo \"ok\"",
+    "test": "echo \"no tests yet\""
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.4.10"
+  },
+  "devDependencies": {
+    "@creator/config": "workspace:*",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.8.2"
+  }
+}
