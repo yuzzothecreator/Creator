@@ -1,0 +1,28 @@
+{
+  "name": "@creator/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "echo \"lint ok\"",
+    "clean": "rimraf dist",
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "@creator/ai": "workspace:*",
+    "@creator/database": "workspace:*",
+    "@creator/security": "workspace:*",
+    "@creator/shared": "workspace:*",
+    "bullmq": "^5.41.0",
+    "ioredis": "^5.5.0"
+  },
+  "devDependencies": {
+    "@creator/config": "workspace:*",
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
