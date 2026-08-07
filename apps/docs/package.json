@@ -1,0 +1,13 @@
+{
+  "name": "@creator/docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Docs are markdown in /docs; Phase 3 can host Fumadocs\"",
+    "build": "echo \"docs static\"",
+    "typecheck": "echo \"ok\"",
+    "lint": "echo \"lint ok\"",
+    "clean": "echo \"ok\"",
+    "test": "echo \"no tests yet\""
+  }
+}
