@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile=false
+      - name: Generate Prisma client
+        run: pnpm db:generate
+        env:
+          DATABASE_URL: postgresql://creator:creator@localhost:5432/creator?schema=public
+      - name: Build packages
+        run: pnpm --filter @creator/shared --filter @creator/prompts --filter @creator/security --filter @creator/ai build
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build web
+        run: pnpm --filter @creator/web build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
