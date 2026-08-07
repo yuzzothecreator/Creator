@@ -1,0 +1,334 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+enum ExperienceMode {
+  beginner
+  intermediate
+  senior
+}
+
+enum ProjectStatus {
+  draft
+  planning
+  awaiting_approval
+  generating
+  reviewing
+  ready
+  failed
+}
+
+enum PipelineStepType {
+  understand
+  clarify
+  prd
+  user_stories
+  features
+  tech_stack
+  folder_structure
+  architecture
+  database
+  api_design
+  ui_wireframe
+  impl_plan
+  await_approval
+  codegen
+  review
+  docs_pack
+}
+
+enum PipelineStepStatus {
+  pending
+  running
+  completed
+  failed
+  awaiting_user
+  skipped
+}
+
+enum ChatRole {
+  user
+  assistant
+  system
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  emailVerified Boolean        @default(false)
+  image         String?
+  mode          ExperienceMode @default(intermediate)
+  preferences   Json           @default("{}")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  sessions     Session[]
+  accounts     Account[]
+  projects     Project[]
+  chatSessions ChatSession[]
+  apiKeys      ApiKey[]
+  usageEvents  UsageEvent[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verifications")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  idea        String
+  status      ProjectStatus @default(draft)
+  mode        ExperienceMode @default(intermediate)
+  stack       Json?
+  ownerId     String
+  owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  generationRuns GenerationRun[]
+  artifacts      Artifact[]
+  fileNodes      FileNode[]
+  chatSessions   ChatSession[]
+  embeddings     Embedding[]
+  deployments    Deployment[]
+
+  @@index([ownerId])
+  @@map("projects")
+}
+
+model GenerationRun {
+  id              String           @id @default(cuid())
+  projectId       String
+  project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage           PipelineStepType @default(understand)
+  prd             Json?
+  stories         Json?
+  features        Json?
+  architecture    Json?
+  approvedForCode Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  steps         PipelineStep[]
+  reviewReports ReviewReport[]
+  jobs          Job[]
+
+  @@index([projectId])
+  @@map("generation_runs")
+}
+
+model PipelineStep {
+  id        String             @id @default(cuid())
+  runId     String
+  run       GenerationRun      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  type      PipelineStepType
+  status    PipelineStepStatus @default(pending)
+  payload   Json?
+  mentoring Json?
+  error     String?
+  sortOrder Int                @default(0)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([runId])
+  @@map("pipeline_steps")
+}
+
+model Artifact {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kind      String
+  title     String
+  content   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@map("artifacts")
+}
+
+model FileNode {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  path      String
+  content   String
+  language  String   @default("plaintext")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, path])
+  @@index([projectId])
+  @@map("file_nodes")
+}
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  title     String   @default("New chat")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+
+  @@index([userId])
+  @@map("chat_sessions")
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      ChatRole
+  content   String
+  mentoring Json?
+  createdAt DateTime    @default(now())
+
+  @@index([sessionId])
+  @@map("messages")
+}
+
+model ReviewReport {
+  id        String        @id @default(cuid())
+  runId     String
+  run       GenerationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  scores    Json
+  findings  Json
+  summary   String
+  overall   Float
+  createdAt DateTime      @default(now())
+
+  @@index([runId])
+  @@map("review_reports")
+}
+
+model ApiKey {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider        String
+  label           String
+  ciphertext      String
+  iv              String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@map("api_keys")
+}
+
+model UsageEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  model     String?
+  tokensIn  Int      @default(0)
+  tokensOut Int      @default(0)
+  costUsd   Float    @default(0)
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("usage_events")
+}
+
+model Job {
+  id        String         @id @default(cuid())
+  runId     String?
+  run       GenerationRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+  queue     String
+  bullId    String?
+  status    String         @default("queued")
+  payload   Json?
+  result    Json?
+  error     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([runId])
+  @@map("jobs")
+}
+
+model Embedding {
+  id        String                       @id @default(cuid())
+  projectId String
+  project   Project                      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  source    String
+  content   String
+  embedding Unsupported("vector(1536)")?
+  createdAt DateTime                     @default(now())
+
+  @@index([projectId])
+  @@map("embeddings")
+}
+
+model Deployment {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  provider  String
+  status    String   @default("pending")
+  url       String?
+  meta      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@map("deployments")
+}
