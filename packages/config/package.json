@@ -1,0 +1,12 @@
+{
+  "name": "@creator/config",
+  "version": "0.1.0",
+  "private": true,
+  "files": ["tsconfig*.json", "eslint*"],
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/next.json": "./tsconfig/next.json",
+    "./tsconfig/nest.json": "./tsconfig/nest.json",
+    "./tsconfig/react-lib.json": "./tsconfig/react-lib.json"
+  }
+}

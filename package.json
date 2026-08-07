@@ -1,0 +1,29 @@
+{
+  "name": "creator",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Creator — Build Software Like a Senior Engineer.",
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "node tests/pipeline.test.mjs && turbo run test",
+    "db:generate": "pnpm --filter @creator/database generate",
+    "db:migrate": "pnpm --filter @creator/database migrate:dev",
+    "db:push": "pnpm --filter @creator/database push",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,yml}\"",
+    "clean": "turbo run clean && rimraf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
