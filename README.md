@@ -14,11 +14,14 @@ Creator is an AI software engineering platform that takes you from idea to produ
 ## Monorepo
 
 ```
-apps/web      Next.js studio + landing
-apps/api      NestJS API
-apps/worker   BullMQ codegen/review worker
-packages/*    shared domain, AI, auth, UI, editor, security
+apps/web             Next.js studio + landing
+apps/api             NestJS Creator platform API
+apps/ecommerce-api   FastAPI e-commerce backend (Python)
+apps/worker          BullMQ codegen/review worker
+packages/*           shared domain, AI, auth, UI, editor, security
 ```
+
+Python storefront API: [`apps/ecommerce-api/README.md`](apps/ecommerce-api/README.md) · [docs/ECOMMERCE_API.md](docs/ECOMMERCE_API.md)
 
 ## Quick start
 

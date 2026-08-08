@@ -84,6 +84,28 @@ services:
     depends_on:
       - api
 
+  # Optional: FastAPI e-commerce backend (apps/ecommerce-api)
+  # Create DB once: docker exec creator-postgres psql -U creator -c "CREATE DATABASE ecommerce;"
+  ecommerce-api:
+    build:
+      context: ..
+      dockerfile: apps/ecommerce-api/Dockerfile
+    container_name: creator-ecommerce-api
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+      DATABASE_URL: postgresql+asyncpg://creator:creator@postgres:5432/ecommerce
+      DATABASE_URL_SYNC: postgresql://creator:creator@postgres:5432/ecommerce
+      JWT_SECRET: change-me-to-a-long-random-string-at-least-32-chars
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      SEED_ON_STARTUP: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   creator_pg:
   creator_redis:
